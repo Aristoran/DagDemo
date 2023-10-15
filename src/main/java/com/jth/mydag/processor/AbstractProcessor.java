@@ -10,5 +10,5 @@ import java.util.concurrent.CompletableFuture;
  */
 public interface AbstractProcessor<T> {
 
-    public CompletableFuture<T> process(Vertex<T> vertex);
+    CompletableFuture<T> process(Vertex<T> vertex);
 }

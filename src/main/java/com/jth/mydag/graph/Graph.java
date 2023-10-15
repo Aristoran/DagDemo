@@ -60,7 +60,8 @@ public class Graph<T> {
     }
 
     private void initVertexMap() {
-        context.getVertices().forEach(vertex -> context.getVertexMap().put(vertex.getName(), vertex));
+        context.getVertices().forEach(vertex
+                -> context.getVertexMap().put(vertex.getName(), vertex));
     }
 
     public void parseGraph() {
