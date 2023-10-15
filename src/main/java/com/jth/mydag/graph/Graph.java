@@ -21,6 +21,9 @@ import java.util.concurrent.atomic.AtomicReference;
 @Component
 public class Graph<T> {
     private static final String TARGET = "target";
+    /**
+     * 图上下文，存放图数据结果、图节点信息.
+     */
     @Getter @Setter
     private GraphContext<T> context;
 
