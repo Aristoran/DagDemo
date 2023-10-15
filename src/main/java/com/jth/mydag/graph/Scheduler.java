@@ -1,6 +1,8 @@
 package com.jth.mydag.graph;
 
 import com.jth.mydag.graph.utils.FutureUtils;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 
 import java.util.ArrayList;
@@ -27,26 +29,33 @@ public class Scheduler<T> {
             128,
             500L,
             TimeUnit.MILLISECONDS,
-            new LinkedBlockingQueue<>());;
-    private final Queue<Vertex<?>> activationQueue;
-    private final Queue<Vertex<?>> executionQueue;
+            new LinkedBlockingQueue<>());
+    /**
+     * 图激活队列.
+     */
+    @Setter @Getter
+    private Queue<Vertex<?>> activationQueue;
+    /**
+     * 图执行队列.
+     */
+    @Setter @Getter
+    private Queue<Vertex<?>> executionQueue;
     public Scheduler() {
         this.activationQueue = new ConcurrentLinkedQueue<>();
         this.executionQueue = new ConcurrentLinkedQueue<>();
-    }
-
-    public Scheduler(ExecutorService executorService,
-                     Queue<Vertex<?>> activationQueue,
-                     Queue<Vertex<?>> executionQueue) {
-        this.executorService =  executorService;
-        this.activationQueue = activationQueue;
-        this.executionQueue = executionQueue;
     }
 
     public Scheduler(Queue<Vertex<?>> activationQueue,
                      Queue<Vertex<?>> executionQueue) {
         this.activationQueue = activationQueue;
         this.executionQueue = executionQueue;
+    }
+
+    public Scheduler(ExecutorService executorService,
+                     Queue<Vertex<?>> activationQueue,
+                     Queue<Vertex<?>> executionQueue) {
+        this(activationQueue, executionQueue);
+        this.executorService =  executorService;
     }
 
     /**

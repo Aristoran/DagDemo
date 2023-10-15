@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+    <import resource="processor.xml"/>
+    <bean id = "vertexA" class="com.jth.mydag.graph.Vertex">
+        <constructor-arg name="name" value="A"/>
+        <constructor-arg name="id" value="0"/>
+        <property name="processor" ref="processorA"/>
+    </bean>
+
+    <bean id = "vertexB" class="com.jth.mydag.graph.Vertex">
+        <constructor-arg name="name" value="B"/>
+        <constructor-arg name="id" value="1"/>
+        <property name="processor" ref="processorB"/>
+        <property name="dependencies">
+            <set>
+                <ref bean="vertexA"/>
+            </set>
+        </property>
+    </bean>
+
+    <bean id = "vertexC" class="com.jth.mydag.graph.Vertex">
+        <constructor-arg name="name" value="C"/>
+        <constructor-arg name="id" value="2"/>
+        <property name="processor" ref="processorC"/>
+        <property name="dependencies">
+            <set>
+                <ref bean="vertexA"/>
+            </set>
+        </property>
+    </bean>
+
+    <bean id = "vertexD" class="com.jth.mydag.graph.Vertex">
+        <constructor-arg name="name" value="D"/>
+        <constructor-arg name="id" value="3"/>
+        <property name="processor" ref="processorD"/>
+        <property name="dependencies">
+            <set>
+                <ref bean="vertexB"/>
+                <ref bean="vertexC"/>
+            </set>
+        </property>
+    </bean>
+
+    <bean id = "vertexE" class="com.jth.mydag.graph.Vertex">
+        <constructor-arg name="name" value="E"/>
+        <constructor-arg name="id" value="4"/>
+        <property name="processor" ref="processorE"/>
+        <property name="dependencies">
+            <set>
+                <ref bean="vertexA"/>
+                <ref bean="vertexC"/>
+            </set>
+        </property>
+    </bean>
+
+    <bean id = "vertexF" class="com.jth.mydag.graph.Vertex">
+        <constructor-arg name="name" value="F"/>
+        <constructor-arg name="id" value="5"/>
+        <property name="processor" ref="processorF"/>
+        <property name="dependencies">
+            <set>
+                <ref bean="vertexE"/>
+                <ref bean="vertexD"/>
+            </set>
+        </property>
+    </bean>
+
+    <bean id = "vertexG" class="com.jth.mydag.graph.Vertex">
+        <constructor-arg name="name" value="target"/>
+        <constructor-arg name="id" value="6"/>
+        <property name="processor" ref="processorG"/>
+        <property name="dependencies">
+            <set>
+                <ref bean="vertexA"/>
+                <ref bean="vertexF"/>
+            </set>
+        </property>
+    </bean>
+
+</beans>

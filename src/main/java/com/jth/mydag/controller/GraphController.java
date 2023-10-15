@@ -21,6 +21,6 @@ public class GraphController {
     public Map<String, Object> runGraph() {
         // 在这里调用 graph 的方法
         graph.run();
-        return graph.getResult();
+        return graph.getContext().getResult();
     }
 }

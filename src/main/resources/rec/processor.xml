@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+    <bean id="processorA" class="com.jth.mydag.processor.ProcessorA"/>
+    <bean id="processorB" class="com.jth.mydag.processor.ProcessorB"/>
+    <bean id="processorC" class="com.jth.mydag.processor.ProcessorC"/>
+    <bean id="processorD" class="com.jth.mydag.processor.ProcessorD"/>
+    <bean id="processorE" class="com.jth.mydag.processor.ProcessorE"/>
+    <bean id="processorF" class="com.jth.mydag.processor.ProcessorF"/>
+    <bean id="processorG" class="com.jth.mydag.processor.ProcessorG"/>
+</beans>

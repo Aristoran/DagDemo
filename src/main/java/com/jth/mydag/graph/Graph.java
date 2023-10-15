@@ -5,14 +5,10 @@ import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -25,55 +21,43 @@ import java.util.concurrent.atomic.AtomicReference;
 @Component
 public class Graph<T> {
     private static final String TARGET = "target";
-    /**
-     * 执行队列.
-     */
-    private final Queue<Vertex<?>> executionQueue = new ConcurrentLinkedQueue<>();
-    /**
-     * 激活队列.
-     */
-    private final Queue<Vertex<?>> activationQueue = new ConcurrentLinkedQueue<>();
-    @Getter@Setter
-    private List<Vertex<?>> vertices;
-    @Getter@Setter
-    private ConcurrentHashMap<String, Vertex<?>> vertexMap;
+    @Getter @Setter
+    private GraphContext<T> context;
 
+    /**
+     * 任务执行器
+     */
     private final Scheduler<T> scheduler;
 
-    @Getter@Setter
-    private T result;
-
+    /**
+     * 调度策略.
+     */
     private RunStrategy strategy = RunStrategy.PARALLEL;
 
 
     public Graph() {
-        this.vertices = new ArrayList<>(200);
-        this.vertexMap = new ConcurrentHashMap<>(256);
-        this.scheduler = new Scheduler<>(activationQueue, executionQueue);
+        this.context = new GraphContext<>();
+        this.scheduler = new Scheduler<>();
     }
 
     public Graph(List<Vertex<?>> vertices) {
-        this.vertices = vertices;
+        this.context = new GraphContext<>(vertices);
+        this.scheduler = new Scheduler<>();
         initVertexMap(); //初始化map
         activateVertex(); //激活图
-        this.scheduler = new Scheduler<>(activationQueue, executionQueue);
     }
 
     public Graph(List<Vertex<?>> vertices, RunStrategy strategy) {
-        this.vertices = vertices;
-        initVertexMap(); //初始化map
-        activateVertex(); //激活图
-        this.scheduler = new Scheduler<>(activationQueue, executionQueue);
+        this(vertices);
         this.strategy = strategy;
     }
 
     public <E> void addVertex(Vertex<E> vertex) {
-        vertexMap.put(vertex.getId(), vertex);
+        context.getVertexMap().put(vertex.getId(), vertex);
     }
 
     private void initVertexMap() {
-        vertexMap = new ConcurrentHashMap<>();
-        vertices.forEach(vertex -> vertexMap.put(vertex.getName(), vertex));
+        context.getVertices().forEach(vertex -> context.getVertexMap().put(vertex.getName(), vertex));
     }
 
     public void parseGraph() {
@@ -84,7 +68,7 @@ public class Graph<T> {
      * 从map中获取目标节点，并激活它。
      */
     public void activateVertex() {
-        Vertex vertex = vertexMap.get(TARGET);
+        Vertex<?> vertex = context.getVertexMap().get(TARGET);
         activate(vertex);
     }
 
@@ -106,15 +90,15 @@ public class Graph<T> {
             return;
         }
         vertex.setIsActivated(new AtomicBoolean(true));
-        activationQueue.add(vertex);
-        while (!activationQueue.isEmpty()) {
-            Vertex<?> currentVertex = activationQueue.poll();
+        scheduler.getActivationQueue().add(vertex);
+        while (!scheduler.getActivationQueue().isEmpty()) {
+            Vertex<?> currentVertex = scheduler.getActivationQueue().poll();
             for (Vertex<?> dependency : currentVertex.getDependencies()) {
                 currentVertex.getDependencyCount().incrementAndGet();
                 activate(dependency);
             }
             if (currentVertex.getDependencyCount().get() == 0) {
-                executionQueue.add(currentVertex);
+                scheduler.getExecutionQueue().add(currentVertex);
             }
         }
     }
@@ -171,7 +155,7 @@ public class Graph<T> {
         // 设置当前顶点为已执行状态
         vertex.setIsExecuted(new AtomicBoolean(true));
         // 遍历所有的节点
-        for (Vertex dependentVertex : vertexMap.values()) {
+        for (Vertex dependentVertex : context.getVertexMap().values()) {
             // 如果节点已经执行过，那么就跳过
             if (vertex == dependentVertex || dependentVertex.getIsExecuted().get()) {
                 continue;
@@ -189,7 +173,7 @@ public class Graph<T> {
                 // 其中一个状态还是false, 仍旧会被添加到队列中来，
                 // 所以包在判断语句内部，只有依赖当前节点的节点可以执行
                 if (dependentVertex.getDependencyCount().get() == 0) {
-                    executionQueue.add(dependentVertex);
+                    scheduler.getExecutionQueue().add(dependentVertex);
                 }
             }
         }
@@ -225,8 +209,8 @@ public class Graph<T> {
             default:
                 scheduler.executeByPool(this);
         }
-        Vertex<T> vertex = (Vertex<T>) vertexMap.get(TARGET);
-        setResult(vertex.getResult());
+        Vertex<T> vertex = (Vertex<T>) context.getVertexMap().get(TARGET);
+        context.setResult(vertex.getResult());
     }
 
     public enum RunStrategy {

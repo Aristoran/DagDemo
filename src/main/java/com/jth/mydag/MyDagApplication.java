@@ -10,10 +10,9 @@ import org.springframework.context.annotation.ImportResource;
  * @author jiatihui
  */
 @SpringBootApplication
-@ImportResource(locations = {"classpath:applicationContext.xml"})
+@ImportResource(locations = {"classpath:applicationContext.xml",
+        "classpath*:rec/processor.xml", "classpath*:rec/vertex.xml"})
 public class MyDagApplication {
-    @Autowired
-    private Graph graph;
     public static void main(String[] args) {
         SpringApplication.run(MyDagApplication.class, args);
     }

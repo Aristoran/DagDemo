@@ -20,7 +20,7 @@ public class GraphTest {
     @Test
     public void test() {
         graph.run();
-        System.out.println(graph.getResult());
+        System.out.println(graph.getContext().getResult());
     }
 
     private List<Vertex<?>> initVertices() {
