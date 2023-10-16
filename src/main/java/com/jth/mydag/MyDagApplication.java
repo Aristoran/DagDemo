@@ -10,8 +10,7 @@ import org.springframework.context.annotation.ImportResource;
  * @author jiatihui
  */
 @SpringBootApplication
-@ImportResource(locations = {"classpath:applicationContext.xml",
-        "classpath*:rec/processor.xml", "classpath*:rec/vertex.xml"})
+@ImportResource(locations = {"classpath:applicationContext.xml"})
 public class MyDagApplication {
     public static void main(String[] args) {
         SpringApplication.run(MyDagApplication.class, args);

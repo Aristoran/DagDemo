@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -31,7 +32,7 @@ public class Graph<T> {
     /**
      * 任务执行器
      */
-    private final Scheduler<T> scheduler;
+    private Scheduler<T> scheduler;
 
     /**
      * 调度策略.
@@ -76,7 +77,7 @@ public class Graph<T> {
     /**
      * 从map中获取目标节点，并激活它。
      */
-    public void activateVertex() {
+    private void activateVertex() {
         Vertex<?> vertex = context.getVertexMap().get(TARGET);
         activate(vertex);
     }
@@ -91,7 +92,7 @@ public class Graph<T> {
      * @param vertex 要激活的节点.
      * @throws IllegalArgumentException 如果图中存在环，抛出该异常.
      */
-    public void activate(Vertex<?> vertex) {
+    private void activate(Vertex<?> vertex) {
         if (isCycle(vertex)) {
             throw new IllegalArgumentException("Cycle detected in graph");
         }
@@ -159,7 +160,7 @@ public class Graph<T> {
      * 2、遍历所有的节点：如果依赖计数为0，那么就会将这个顶点添加到执行队列中.
      * @param vertex 当前需要处理的节点.
      */
-    public  <E> void processVertex(Vertex<E> vertex) {
+    protected <E> void processVertex(Vertex<E> vertex) {
         log.error(String.format("vertex %s executing by %s", vertex.getName(), Thread.currentThread().getName()));
         // 处理当前顶点并设置结果
         processFutureTask(vertex);
@@ -226,6 +227,14 @@ public class Graph<T> {
         long end = System.currentTimeMillis();
         log.error("time cost is: " + (end - start) + "ms");
 
+    }
+
+    /**
+     * 图重置.
+     */
+    public void reset() {
+        context.reset();
+        this.scheduler = new Scheduler<>();
     }
 
     public enum RunStrategy {

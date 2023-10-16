@@ -11,4 +11,8 @@ import java.util.concurrent.CompletableFuture;
 public interface AbstractProcessor<T> {
 
     CompletableFuture<T> process(Vertex<T> vertex);
+
+    default void reset() {
+
+    };
 }

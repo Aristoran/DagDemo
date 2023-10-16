@@ -23,6 +23,9 @@ public class GraphController {
     public Map<String, Object> runGraph() {
         // 在这里调用 graph 的方法
         graph.run();
-        return graph.getContext().getResult();
+        Map<String, Object> result = graph.getContext().getResult();
+        //重置图
+        graph.reset();
+        return result;
     }
 }

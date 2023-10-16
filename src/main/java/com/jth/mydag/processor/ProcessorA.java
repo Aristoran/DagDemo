@@ -12,7 +12,7 @@ public class ProcessorA implements AbstractProcessor<String> {
 
     @Override
     public CompletableFuture<String> process(Vertex<String> vertex) {
-        return CompletableFuture.completedFuture("A");
+        return CompletableFuture.completedFuture("A" + System.currentTimeMillis());
     }
 
 }

@@ -37,4 +37,12 @@ public class GraphContext<T> {
         this();
         this.vertices = vertices;
     }
+
+    /**
+     * 重置成员变量
+     */
+    protected void reset() {
+        this.vertices.forEach(Vertex::reset);
+        this.result = null;
+    }
 }

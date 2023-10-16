@@ -59,7 +59,7 @@ public class Vertex<T> {
      * 存放的依赖节点产出的数据.
      */
     @Setter
-    private Map<String, Object> dependencyData = new ConcurrentHashMap<>();
+    private Map<String, Object> dependencyData = new ConcurrentHashMap<>(100);
 
     /**
      * 执行具体逻辑的processor.
@@ -108,5 +108,14 @@ public class Vertex<T> {
     @Override
     public int hashCode() {
         return super.hashCode();
+    }
+
+    public void reset() {
+        this.processor.reset();
+        this.dependencyCount = new AtomicInteger(0);
+        this.dependencyData = new ConcurrentHashMap<>(100);
+        this.isExecuted = new AtomicBoolean(false);
+        this.isActivated = new AtomicBoolean(false);
+        this.result = null;
     }
 }
