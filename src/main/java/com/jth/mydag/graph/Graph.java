@@ -1,5 +1,6 @@
 package com.jth.mydag.graph;
 
+import com.jth.mydag.graph.utils.GraphConstants;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
@@ -10,7 +11,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -22,7 +22,6 @@ import java.util.concurrent.atomic.AtomicReference;
 @Log4j2
 @Component
 public class Graph<T> {
-    private static final String TARGET = "target";
     /**
      * 图上下文，存放图数据结果、图节点信息.
      */
@@ -78,7 +77,7 @@ public class Graph<T> {
      * 从map中获取目标节点，并激活它。
      */
     private void activateVertex() {
-        Vertex<?> vertex = context.getVertexMap().get(TARGET);
+        Vertex<?> vertex = context.getVertexMap().get(GraphConstants.TARGET);
         activate(vertex);
     }
 
@@ -206,7 +205,7 @@ public class Graph<T> {
     }
 
     /**
-     * 真正执行图调度入口
+     * 真正执行图调度入口.
      */
     public void run() {
         activateVertex();//执行前激活图
@@ -222,11 +221,9 @@ public class Graph<T> {
             default:
                 scheduler.executeGraph(this);
         }
-        Vertex<T> vertex = (Vertex<T>) context.getVertexMap().get(TARGET);
-        context.setResult(vertex.getResult());
+        context.collectResult();
         long end = System.currentTimeMillis();
         log.error("time cost is: " + (end - start) + "ms");
-
     }
 
     /**

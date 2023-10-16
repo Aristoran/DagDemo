@@ -1,5 +1,6 @@
 package com.jth.mydag.graph;
 
+import com.jth.mydag.graph.utils.GraphConstants;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.stereotype.Component;
@@ -36,6 +37,11 @@ public class GraphContext<T> {
     public GraphContext(List<Vertex<?>> vertices) {
         this();
         this.vertices = vertices;
+    }
+
+    public void collectResult() {
+        Vertex<T> vertex = (Vertex<T>) vertexMap.get(GraphConstants.TARGET);
+        setResult(vertex.getResult());
     }
 
     /**

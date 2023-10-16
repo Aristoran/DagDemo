@@ -61,7 +61,7 @@ public class Scheduler<T> {
     /**
      * 串行执行图方式.
      */
-    public  void executeSerial(Graph<T> graph) {
+    public void executeSerial(Graph<T> graph) {
         Vertex<?> vertex;
         while ((vertex = executionQueue.poll()) != null) {
             graph.processVertex(vertex);

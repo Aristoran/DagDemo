@@ -35,31 +35,36 @@ public class Vertex<T> {
      */
     @Setter
     private AtomicInteger dependencyCount = new AtomicInteger(0);
+
     /**
      * 依赖的节点
      */
     @Setter
     private Set<Vertex<?>> dependencies;
-    /**
-     * 节点处理后的数据存放在此.
-     */
-    @Setter
-    private T result;
-    /**
-     * 是否激活标识.
-     */
-    @Setter
-    private AtomicBoolean isActivated = new AtomicBoolean(false);
-    /**
-     * 是否已经执行标识.
-     */
-    @Setter
-    private AtomicBoolean isExecuted = new AtomicBoolean(false);
+
     /**
      * 存放的依赖节点产出的数据.
      */
     @Setter
     private Map<String, Object> dependencyData = new ConcurrentHashMap<>(100);
+
+    /**
+     * 节点处理后的数据存放在此.
+     */
+    @Setter
+    private T result;
+
+    /**
+     * 是否激活标识.
+     */
+    @Setter
+    private AtomicBoolean isActivated = new AtomicBoolean(false);
+
+    /**
+     * 是否已经执行标识.
+     */
+    @Setter
+    private AtomicBoolean isExecuted = new AtomicBoolean(false);
 
     /**
      * 执行具体逻辑的processor.
