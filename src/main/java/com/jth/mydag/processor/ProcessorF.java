@@ -12,7 +12,7 @@ public class ProcessorF implements AbstractProcessor<String>{
     @Override
     public CompletableFuture<String> process(Vertex<String> vertex) {
         try {
-            Thread.sleep(100);
+            Thread.sleep(10);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }

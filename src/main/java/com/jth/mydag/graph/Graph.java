@@ -5,6 +5,7 @@ import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -46,13 +47,16 @@ public class Graph<T> {
     public Graph(List<Vertex<?>> vertices) {
         this.context = new GraphContext<>(vertices);
         this.scheduler = new Scheduler<>();
-        initVertexMap(); //初始化map
-        activateVertex(); //激活图
     }
 
     public Graph(List<Vertex<?>> vertices, RunStrategy strategy) {
         this(vertices);
         this.strategy = strategy;
+    }
+
+    @PostConstruct
+    public void init() {
+        initVertexMap();
     }
 
     public <E> void addVertex(Vertex<E> vertex) {
@@ -83,7 +87,7 @@ public class Graph<T> {
      * 3、遍历激活队列，对每个节点的依赖项进行激活，并增加依赖计数.
      * 4、如果顶点的依赖计数为0，说明该顶点没有依赖项，可以直接添加到执行队列中.
      *
-     * @param vertex 要激活的顶点.
+     * @param vertex 要激活的节点.
      * @throws IllegalArgumentException 如果图中存在环，抛出该异常.
      */
     public void activate(Vertex<?> vertex) {
@@ -131,6 +135,7 @@ public class Graph<T> {
                                Set<Vertex<?>> visited,
                                Set<Vertex<?>> recursionStack) {
         if (recursionStack.contains(vertex)) {
+            log.error(String.format("vertex %s may be visited, graph is cycle!", vertex.getName()));
             return true;
         }
         if (visited.contains(vertex)) {
@@ -154,10 +159,12 @@ public class Graph<T> {
      * @param vertex 当前需要处理的节点.
      */
     public  <E> void processVertex(Vertex<E> vertex) {
+        log.error(String.format("vertex %s executing by %s", vertex.getName(), Thread.currentThread().getName()));
         // 处理当前顶点并设置结果
         processFutureTask(vertex);
         // 设置当前顶点为已执行状态
         vertex.setIsExecuted(new AtomicBoolean(true));
+        log.error(String.format("vertex %s executed", vertex.getName()));
         // 遍历所有的节点
         for (Vertex dependentVertex : context.getVertexMap().values()) {
             // 如果节点已经执行过，那么就跳过
@@ -200,8 +207,8 @@ public class Graph<T> {
      * 真正执行图调度入口
      */
     public void run() {
-        initVertexMap();
-        activateVertex(); //执行前需要激活
+        activateVertex();//执行前激活图
+        long start = System.currentTimeMillis();
         switch (strategy) {
             case SERIAL:
                 scheduler.executeSerial(this);
@@ -215,6 +222,9 @@ public class Graph<T> {
         }
         Vertex<T> vertex = (Vertex<T>) context.getVertexMap().get(TARGET);
         context.setResult(vertex.getResult());
+        long end = System.currentTimeMillis();
+        log.error("time cost is: " + (end - start) + "ms");
+
     }
 
     public enum RunStrategy {
