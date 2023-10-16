@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd">
     <import resource="classpath*:rec/vertex.xml"/>
 
     <bean id = "graphA" class="com.jth.mydag.graph.Graph">
         <property name="context" ref="graphContext"/>
+        <property name="scheduler" ref = "schedulerParallel"/>
     </bean>
 
     <bean id = "graphContext" class="com.jth.mydag.graph.GraphContext">
@@ -19,6 +20,12 @@
                 <ref bean="vertexF"/>
                 <ref bean="vertexG"/>
             </list>
+        </property>
+    </bean>
+    <!--并行任务调度器-->
+    <bean id="schedulerParallel" class="com.jth.mydag.graph.scheduler.ParallelScheduler">
+        <property name="strategy">
+            <util:constant static-field="com.jth.mydag.graph.scheduler.ParallelScheduler$RunStrategy.POOL"/>
         </property>
     </bean>
 

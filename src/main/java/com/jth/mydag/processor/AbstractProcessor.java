@@ -6,13 +6,14 @@ import java.util.concurrent.CompletableFuture;
 
 /**
  * @author jiatihui
- * @Description: 抽象接口，提供执行方法
  */
-public interface AbstractProcessor<T> {
-
-    CompletableFuture<T> process(Vertex<T> vertex);
-
-    default void reset() {
-
-    };
+public abstract class AbstractProcessor<T> implements IProcessor<T> {
+    @Override
+    public CompletableFuture<T> process(Vertex<T> vertex) {
+        // TODO: Implement processing logic here
+        return null;
+    }
+    public void reset() {
+        // TODO: Implement reset logic here
+    }
 }

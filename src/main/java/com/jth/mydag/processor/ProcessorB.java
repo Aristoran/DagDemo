@@ -7,7 +7,7 @@ import java.util.concurrent.CompletableFuture;
 /**
  * @author jiatihui
  */
-public class ProcessorB implements AbstractProcessor<String>{
+public class ProcessorB extends AbstractProcessor<String> {
 
     @Override
     public CompletableFuture<String> process(Vertex<String> vertex) {

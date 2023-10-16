@@ -1,5 +1,7 @@
 package com.jth.mydag.graph;
 
+import com.jth.mydag.graph.scheduler.AbstractSubScheduler;
+import com.jth.mydag.graph.scheduler.ParallelScheduler;
 import com.jth.mydag.graph.utils.GraphConstants;
 import lombok.Getter;
 import lombok.Setter;
@@ -18,7 +20,6 @@ import java.util.concurrent.atomic.AtomicReference;
  * @author jiatihui
  * @Description: 图对象.
  */
-
 @Log4j2
 @Component
 public class Graph<T> {
@@ -31,28 +32,24 @@ public class Graph<T> {
     /**
      * 任务执行器
      */
-    private Scheduler<T> scheduler;
-
-    /**
-     * 调度策略.
-     */
-    private RunStrategy strategy = RunStrategy.PARALLEL;
-
+    @Setter
+    private AbstractSubScheduler<T> scheduler;
 
     public Graph() {
         this.context = new GraphContext<>();
-        this.scheduler = new Scheduler<>();
+        this.scheduler = new ParallelScheduler<>();
     }
 
     public Graph(List<Vertex<?>> vertices) {
         this.context = new GraphContext<>(vertices);
         initVertexMap();
-        this.scheduler = new Scheduler<>();
+        this.scheduler = new ParallelScheduler<>();
     }
 
-    public Graph(List<Vertex<?>> vertices, RunStrategy strategy) {
+    public Graph(List<Vertex<?>> vertices, AbstractSubScheduler<T> scheduler) {
         this(vertices);
-        this.strategy = strategy;
+        this.scheduler = scheduler;
+        initVertexMap();
     }
 
     @PostConstruct
@@ -159,7 +156,7 @@ public class Graph<T> {
      * 2、遍历所有的节点：如果依赖计数为0，那么就会将这个顶点添加到执行队列中.
      * @param vertex 当前需要处理的节点.
      */
-    protected <E> void processVertex(Vertex<E> vertex) {
+    public <E> void processVertex(Vertex<E> vertex) {
         log.error(String.format("vertex %s executing by %s", vertex.getName(), Thread.currentThread().getName()));
         // 处理当前顶点并设置结果
         processFutureTask(vertex);
@@ -167,7 +164,7 @@ public class Graph<T> {
         vertex.setIsExecuted(new AtomicBoolean(true));
         log.error(String.format("vertex %s executed", vertex.getName()));
         // 遍历所有的节点
-        for (Vertex dependentVertex : context.getVertexMap().values()) {
+        for (Vertex<?> dependentVertex : context.getVertexMap().values()) {
             // 如果节点已经执行过，那么就跳过
             if (vertex == dependentVertex || dependentVertex.getIsExecuted().get()) {
                 continue;
@@ -210,18 +207,7 @@ public class Graph<T> {
     public void run() {
         activateVertex();//执行前激活图
         long start = System.currentTimeMillis();
-        switch (strategy) {
-            case SERIAL:
-                scheduler.executeSerial(this);
-                break;
-            case PARALLEL_WITH_FUTURE:
-                scheduler.executeByFuture(this);
-                break;
-            case PARALLEL:
-            default:
-                scheduler.executeGraph(this);
-        }
-        context.collectResult();
+        scheduler.schedule(this);
         long end = System.currentTimeMillis();
         log.error("time cost is: " + (end - start) + "ms");
     }
@@ -231,14 +217,7 @@ public class Graph<T> {
      */
     public void reset() {
         context.reset();
-        this.scheduler = new Scheduler<>();
-    }
-
-    public enum RunStrategy {
-        SERIAL,
-        PARALLEL,
-        PARALLEL_WITH_FUTURE
-
+        scheduler.reset();
     }
 
 }

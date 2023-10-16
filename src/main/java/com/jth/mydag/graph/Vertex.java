@@ -1,6 +1,7 @@
 package com.jth.mydag.graph;
 
 import com.jth.mydag.processor.AbstractProcessor;
+import com.jth.mydag.processor.IProcessor;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.stereotype.Component;

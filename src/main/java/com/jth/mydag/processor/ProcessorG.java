@@ -9,7 +9,7 @@ import java.util.concurrent.CompletableFuture;
 /**
  * @author jiatihui
  */
-public class ProcessorG implements AbstractProcessor<Map<String, Object>>{
+public class ProcessorG extends AbstractProcessor<Map<String, Object>> {
     @Override
     public CompletableFuture<Map<String, Object>> process(Vertex<Map<String, Object>> vertex) {
         Object aResult = vertex.getDependencyData().get("A");

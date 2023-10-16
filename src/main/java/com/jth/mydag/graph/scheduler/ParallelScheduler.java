@@ -1,70 +1,74 @@
-package com.jth.mydag.graph;
+package com.jth.mydag.graph.scheduler;
 
+import com.jth.mydag.graph.Graph;
+import com.jth.mydag.graph.Vertex;
+import com.jth.mydag.graph.config.AppConfig;
 import com.jth.mydag.graph.utils.FutureUtils;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-
 
 /**
  * @author jiatihui
- * @Description: 图节点任务调度器，提供串行、并行两种调度方式
+ * @Description: 图节点任务调度器，提供两种并发调度.
  */
 @Log4j2
-public class Scheduler<T> {
-    private ExecutorService executorService = new ThreadPoolExecutor(
-            64,
-            128,
-            500L,
-            TimeUnit.MILLISECONDS,
-            new LinkedBlockingQueue<>());
-    /**
-     * 图激活队列.
-     */
-    @Setter @Getter
-    private Queue<Vertex<?>> activationQueue;
-    /**
-     * 图执行队列.
-     */
-    @Setter @Getter
-    private Queue<Vertex<?>> executionQueue;
-    public Scheduler() {
-        this.activationQueue = new ConcurrentLinkedQueue<>();
-        this.executionQueue = new ConcurrentLinkedQueue<>();
-    }
+@Component
+@Getter @Setter
+public class ParallelScheduler<T> extends AbstractSubScheduler<T> {
 
-    public Scheduler(Queue<Vertex<?>> activationQueue,
-                     Queue<Vertex<?>> executionQueue) {
-        this.activationQueue = activationQueue;
-        this.executionQueue = executionQueue;
-    }
+    /**
+     * 自定义线程池.
+     */
+    @Autowired
+    public ExecutorService executorService;
 
-    public Scheduler(ExecutorService executorService,
+    private RunStrategy strategy = RunStrategy.POOL;
+
+    public ParallelScheduler() {
+        super();
+    }
+    public ParallelScheduler(ExecutorService executorService,
                      Queue<Vertex<?>> activationQueue,
                      Queue<Vertex<?>> executionQueue) {
-        this(activationQueue, executionQueue);
+        super(activationQueue, executionQueue);
         this.executorService =  executorService;
     }
 
+    @Override
+    public void executeTask(Graph<T> graph) {
+        executeByStrategy(graph);
+    }
+
+    @Override
+    public void reset() {
+        super.reset();
+        this.executorService = new AppConfig().executorService();
+    }
+
     /**
-     * 串行执行图方式.
+     * 根据策略执行图调度，线程池 or CompletableFuture.
      */
-    public void executeSerial(Graph<T> graph) {
-        Vertex<?> vertex;
-        while ((vertex = executionQueue.poll()) != null) {
-            graph.processVertex(vertex);
+    public void executeByStrategy(Graph<T> graph) {
+        switch (strategy) {
+            case FUTURE:
+                executeByFuture(graph);
+                break;
+            case POOL:
+            default:
+                executeGraph(graph);
+                break;
         }
     }
 
@@ -136,7 +140,7 @@ public class Scheduler<T> {
                 });
     }
 
-    private class Task<E> implements Runnable {
+    public class Task<E> implements Runnable {
         private final Vertex<E> vertex;
         private final Graph<T> graph;
         public Task(Vertex<E> vertex, Graph<T> graph) {
@@ -146,7 +150,17 @@ public class Scheduler<T> {
 
         @Override
         public void run() {
-            graph.processVertex(vertex);
+            try {
+                graph.processVertex(vertex);
+            } catch (RuntimeException re) {
+                log.error("Error processing vertex: " + vertex.getId(), re);
+            }
         }
+    }
+
+    public enum RunStrategy {
+        POOL,
+        FUTURE
+
     }
 }

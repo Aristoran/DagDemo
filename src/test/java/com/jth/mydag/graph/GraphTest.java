@@ -1,20 +1,26 @@
 package com.jth.mydag.graph;
 
 
+import com.jth.mydag.graph.config.AppConfig;
+import com.jth.mydag.graph.scheduler.AbstractSubScheduler;
+import com.jth.mydag.graph.scheduler.ParallelScheduler;
 import com.jth.mydag.processor.*;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class GraphTest {
 
-    Graph graph;
+    Graph<?> graph;
     @Before
     public void init() {
         List<Vertex<?>> vertices = initVertices();
-        graph = new Graph<>(vertices, Graph.RunStrategy.PARALLEL);
+        AbstractSubScheduler<?> scheduler = new ParallelScheduler<>(new AppConfig().executorService(),
+                new ConcurrentLinkedQueue<>(), new ConcurrentLinkedQueue<>());
+        graph = new Graph<>(vertices, scheduler);
     }
 
     @Test

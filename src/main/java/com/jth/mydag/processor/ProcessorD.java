@@ -9,7 +9,7 @@ import java.util.concurrent.CompletableFuture;
 /**
  * @author jiatihui
  */
-public class ProcessorD implements AbstractProcessor<List<Integer>>{
+public class ProcessorD extends AbstractProcessor<List<Integer>> {
     @Override
     public CompletableFuture<List<Integer>> process(Vertex<List<Integer>> vertex) {
         try {

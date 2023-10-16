@@ -8,11 +8,10 @@ import java.util.concurrent.CompletableFuture;
  * @author jiatihui
  */
 
-public class ProcessorA implements AbstractProcessor<String> {
+public class ProcessorA extends AbstractProcessor<String> {
 
     @Override
     public CompletableFuture<String> process(Vertex<String> vertex) {
         return CompletableFuture.completedFuture("A" + System.currentTimeMillis());
     }
-
 }
