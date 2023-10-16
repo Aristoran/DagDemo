@@ -219,7 +219,7 @@ public class Graph<T> {
                 break;
             case PARALLEL:
             default:
-                scheduler.executeByPool(this);
+                scheduler.executeGraph(this);
         }
         Vertex<T> vertex = (Vertex<T>) context.getVertexMap().get(TARGET);
         context.setResult(vertex.getResult());
