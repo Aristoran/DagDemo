@@ -46,6 +46,7 @@ public class Graph<T> {
 
     public Graph(List<Vertex<?>> vertices) {
         this.context = new GraphContext<>(vertices);
+        initVertexMap();
         this.scheduler = new Scheduler<>();
     }
 

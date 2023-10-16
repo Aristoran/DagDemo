@@ -4,12 +4,14 @@ import com.jth.mydag.graph.Graph;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.ImportResource;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
 
+/**
+ * @author jiatihui
+ */
 @RestController
 @SpringBootApplication
 public class GraphController {
