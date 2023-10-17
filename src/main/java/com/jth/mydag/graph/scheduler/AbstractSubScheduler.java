@@ -19,6 +19,9 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 @Scope("prototype")
 public abstract class AbstractSubScheduler<T> implements IScheduler<Graph<T>> {
 
+    /**
+     * 图激活队列.
+     */
     @Setter
     public Queue<Vertex<?>> activationQueue;
     /**
@@ -46,7 +49,6 @@ public abstract class AbstractSubScheduler<T> implements IScheduler<Graph<T>> {
      */
     @Override
     public void schedule(Graph<T> graph) {
-        //TODO: 可以补充通用逻辑
         executeTask(graph);
         graph.getContext().collectResult();//结果收集
     }
