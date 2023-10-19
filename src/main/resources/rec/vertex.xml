@@ -13,10 +13,10 @@
         <constructor-arg name="name" value="B"/>
         <constructor-arg name="id" value="1"/>
         <property name="processor" ref="processorB"/>
-        <property name="dependencies">
-            <set>
-                <ref bean="vertexA"/>
-            </set>
+        <property name="dependencyNames">
+            <list>
+                <value>A</value>
+            </list>
         </property>
     </bean>
 
@@ -24,10 +24,10 @@
         <constructor-arg name="name" value="C"/>
         <constructor-arg name="id" value="2"/>
         <property name="processor" ref="processorC"/>
-        <property name="dependencies">
-            <set>
-                <ref bean="vertexA"/>
-            </set>
+        <property name="dependencyNames">
+            <list>
+                <value>A</value>
+            </list>
         </property>
     </bean>
 
@@ -35,11 +35,10 @@
         <constructor-arg name="name" value="D"/>
         <constructor-arg name="id" value="3"/>
         <property name="processor" ref="processorD"/>
-        <property name="dependencies">
-            <set>
-                <ref bean="vertexB"/>
-                <ref bean="vertexC"/>
-            </set>
+        <property name="dependencyNames">
+            <list>
+                <value>C</value>
+            </list>
         </property>
     </bean>
 
@@ -47,11 +46,11 @@
         <constructor-arg name="name" value="E"/>
         <constructor-arg name="id" value="4"/>
         <property name="processor" ref="processorE"/>
-        <property name="dependencies">
-            <set>
-                <ref bean="vertexA"/>
-                <ref bean="vertexC"/>
-            </set>
+        <property name="dependencyNames">
+            <list>
+                <value>A</value>
+                <value>C</value>
+            </list>
         </property>
     </bean>
 
@@ -59,11 +58,11 @@
         <constructor-arg name="name" value="F"/>
         <constructor-arg name="id" value="5"/>
         <property name="processor" ref="processorF"/>
-        <property name="dependencies">
-            <set>
-                <ref bean="vertexE"/>
-                <ref bean="vertexD"/>
-            </set>
+        <property name="dependencyNames">
+            <list>
+                <value>E</value>
+                <value>D</value>
+            </list>
         </property>
     </bean>
 
@@ -71,11 +70,12 @@
         <constructor-arg name="name" value="target"/>
         <constructor-arg name="id" value="6"/>
         <property name="processor" ref="processorG"/>
-        <property name="dependencies">
-            <set>
-                <ref bean="vertexA"/>
-                <ref bean="vertexF"/>
-            </set>
+        <property name="dependencyNames">
+            <list>
+                <value>A</value>
+                <value>B</value>
+                <value>F</value>
+            </list>
         </property>
     </bean>
 

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @Description: 图的上下文信息.
@@ -20,6 +21,7 @@ public class GraphContext<T> {
      * 图节点.
      */
     private List<Vertex<?>> vertices;
+
     /**
      * 图节点映射.
      */

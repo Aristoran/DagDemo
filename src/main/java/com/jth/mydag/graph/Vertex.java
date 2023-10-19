@@ -6,7 +6,9 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -21,7 +23,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Component
 public class Vertex<T> {
     /**
-     *  设置唯一名称.
+     *  设置唯一名称作为产出依据.
      */
     @Setter
     private String name;
@@ -30,6 +32,12 @@ public class Vertex<T> {
      */
     @Setter
     private String id;
+
+    /**
+     * 依赖的数据源name.
+     */
+    @Setter
+    private List<String> dependencyNames = new ArrayList<>();
 
     /**
      * 依赖数据的数量，只有当所有依赖节点都执行完毕，才可执行.

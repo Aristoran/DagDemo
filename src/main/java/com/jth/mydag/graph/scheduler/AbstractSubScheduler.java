@@ -2,13 +2,12 @@ package com.jth.mydag.graph.scheduler;
 
 import com.jth.mydag.graph.Graph;
 import com.jth.mydag.graph.Vertex;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.context.annotation.Scope;
-
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * @author jiatihui

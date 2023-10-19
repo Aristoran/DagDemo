@@ -3,6 +3,7 @@ package com.jth.mydag.processor;
 import com.jth.mydag.graph.Vertex;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -17,8 +18,7 @@ public class ProcessorD extends AbstractProcessor<List<Integer>> {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-        String bRes = (String)vertex.getDependencyData().get("B");
         Integer cRes = (Integer)vertex.getDependencyData().get("C");
-        return CompletableFuture.completedFuture(Arrays.asList(Integer.parseInt(bRes), cRes));
+        return CompletableFuture.completedFuture(Collections.singletonList(cRes));
     }
 }

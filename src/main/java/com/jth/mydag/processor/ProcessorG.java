@@ -13,9 +13,11 @@ public class ProcessorG extends AbstractProcessor<Map<String, Object>> {
     @Override
     public CompletableFuture<Map<String, Object>> process(Vertex<Map<String, Object>> vertex) {
         Object aResult = vertex.getDependencyData().get("A");
+        Object bResult = vertex.getDependencyData().get("B");
         Object fResult = vertex.getDependencyData().get("F");
         Map<String, Object> map = new HashMap<>();
         map.put("A", aResult);
+        map.put("B", bResult);
         map.put("F", fResult);
         try {
             Thread.sleep(100);

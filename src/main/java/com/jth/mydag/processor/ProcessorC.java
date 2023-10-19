@@ -11,7 +11,7 @@ public class ProcessorC extends AbstractProcessor<Integer> {
     @Override
     public CompletableFuture<Integer> process(Vertex<Integer> vertex) {
         try {
-            Thread.sleep(100);
+            Thread.sleep(20);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }

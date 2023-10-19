@@ -5,6 +5,7 @@ import com.jth.mydag.graph.config.AppConfig;
 import com.jth.mydag.graph.scheduler.AbstractSubScheduler;
 import com.jth.mydag.graph.scheduler.ParallelScheduler;
 import com.jth.mydag.processor.*;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -15,11 +16,13 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class GraphTest {
 
     Graph<?> graph;
+    AbstractSubScheduler<?> scheduler;
     @Before
     public void init() {
         List<Vertex<?>> vertices = initVertices();
-        AbstractSubScheduler<?> scheduler = new ParallelScheduler<>(new AppConfig().executorService(),
-                new ConcurrentLinkedQueue<>(), new ConcurrentLinkedQueue<>());
+        scheduler = new ParallelScheduler<>(new AppConfig().executorService(),
+                new ConcurrentLinkedQueue<>(), new ConcurrentLinkedQueue<>(),
+                ParallelScheduler.RunStrategy.POOL);
         graph = new Graph<>(vertices, scheduler);
     }
 
@@ -27,6 +30,11 @@ public class GraphTest {
     public void test() {
         graph.run();
         System.out.println(graph.getContext().getResult());
+    }
+
+    @After
+    public void shutdown() {
+        ((ParallelScheduler<?>) scheduler).executorService.shutdown();
     }
 
     private List<Vertex<?>> initVertices() {
@@ -37,16 +45,16 @@ public class GraphTest {
         Vertex<String> vertexE = new Vertex<>("E", "567", new ProcessorE());
         Vertex<String> vertexF = new Vertex<>("F", "678", new ProcessorF());
         Vertex<Map<String, Object>> vertexG = new Vertex<>("target", "7890", new ProcessorG());
-        vertexB.addDependency(vertexA);
-        vertexC.addDependency(vertexA);
-        vertexD.addDependency(vertexB);
-        vertexD.addDependency(vertexC);
-        vertexE.addDependency(vertexA);
-        vertexE.addDependency(vertexC);
-        vertexF.addDependency(vertexD);
-        vertexF.addDependency(vertexE);
-        vertexG.addDependency(vertexF);
-        vertexG.addDependency(vertexA);
+        vertexB.getDependencyNames().add("A");
+        vertexC.getDependencyNames().add("A");
+        vertexD.getDependencyNames().add("C");
+        vertexE.getDependencyNames().add("A");
+        vertexE.getDependencyNames().add("C");
+        vertexF.getDependencyNames().add("D");
+        vertexF.getDependencyNames().add("E");
+        vertexG.getDependencyNames().add("F");
+        vertexG.getDependencyNames().add("B");
+        vertexG.getDependencyNames().add("A");
         return List.of(vertexA, vertexB,
                 vertexC, vertexD, vertexE, vertexF, vertexG);
     }
