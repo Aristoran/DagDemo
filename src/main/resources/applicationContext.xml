@@ -7,9 +7,6 @@
     <bean id = "graphA" class="com.jth.mydag.graph.Graph">
         <property name="context" ref="graphContext"/>
         <property name="scheduler" ref = "schedulerParallel"/>
-    </bean>
-
-    <bean id = "graphContext" class="com.jth.mydag.graph.GraphContext">
         <property name="vertices">
             <list>
                 <ref bean="vertexA"/>
@@ -18,16 +15,15 @@
                 <ref bean="vertexD"/>
                 <ref bean="vertexE"/>
                 <ref bean="vertexF"/>
+                <ref bean="subGraphVertex"/>
                 <ref bean="vertexG"/>
             </list>
         </property>
     </bean>
-    <!--并行任务调度器-->
-    <bean id="schedulerParallel" class="com.jth.mydag.graph.scheduler.ParallelScheduler">
-        <property name="strategy">
-            <util:constant static-field="com.jth.mydag.graph.scheduler.ParallelScheduler$RunStrategy.POOL"/>
-        </property>
+
+    <bean id = "graphContext" class="com.jth.mydag.graph.GraphContext">
     </bean>
+
 
 
 </beans>

@@ -26,54 +26,54 @@ public class Vertex<T> {
      *  设置唯一名称作为产出依据.
      */
     @Setter
-    private String name;
+    protected String name;
     /**
      * 设置唯一id.
      */
     @Setter
-    private String id;
+    protected String id;
 
     /**
      * 依赖的数据源name.
      */
     @Setter
-    private List<String> dependencyNames = new ArrayList<>();
+    protected List<String> dependencyNames = new ArrayList<>();
 
     /**
      * 依赖数据的数量，只有当所有依赖节点都执行完毕，才可执行.
      */
     @Setter
-    private AtomicInteger dependencyCount = new AtomicInteger(0);
+    protected AtomicInteger dependencyCount = new AtomicInteger(0);
 
     /**
      * 依赖的节点
      */
     @Setter
-    private Set<Vertex<?>> dependencies;
+    protected Set<Vertex<?>> dependencies;
 
     /**
      * 存放的依赖节点产出的数据.
      */
     @Setter
-    private Map<String, Object> dependencyData = new ConcurrentHashMap<>(100);
+    protected Map<String, Object> dependencyData = new ConcurrentHashMap<>(100);
 
     /**
      * 节点处理后的数据存放在此.
      */
     @Setter
-    private T result;
+    protected T result;
 
     /**
      * 是否激活标识.
      */
     @Setter
-    private AtomicBoolean isActivated = new AtomicBoolean(false);
+    protected AtomicBoolean isActivated = new AtomicBoolean(false);
 
     /**
      * 是否已经执行标识.
      */
     @Setter
-    private AtomicBoolean isExecuted = new AtomicBoolean(false);
+    protected AtomicBoolean isExecuted = new AtomicBoolean(false);
 
     /**
      * 执行具体逻辑的processor.
@@ -106,7 +106,7 @@ public class Vertex<T> {
         return processor.process(vertex);
     };
 
-    public boolean put(Object data, String key) {
+    public <E> boolean put(E data, String key) {
         if (dependencyData == null) {
             return false;
         }
@@ -125,7 +125,9 @@ public class Vertex<T> {
     }
 
     public void reset() {
-        this.processor.reset();
+        if (this.processor != null) {
+            this.processor.reset();
+        }
         this.dependencyCount = new AtomicInteger(0);
         this.dependencyData = new ConcurrentHashMap<>(100);
         this.isExecuted = new AtomicBoolean(false);

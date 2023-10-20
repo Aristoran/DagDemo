@@ -4,21 +4,15 @@ import com.jth.mydag.graph.Graph;
 import com.jth.mydag.graph.Vertex;
 import org.springframework.stereotype.Component;
 
-import java.util.Queue;
-
 /**
  * @author jiatihui
  * @Description: 串行调度任务器.
  */
 @Component
-public class SerialScheduler<T> extends AbstractSubScheduler<T> {
+public class SerialScheduler extends AbstractSubScheduler {
 
     public SerialScheduler() {
         super();
-    }
-    public SerialScheduler(Queue<Vertex<?>> activationQueue,
-                           Queue<Vertex<?>> executionQueue) {
-        super(activationQueue, executionQueue);
     }
 
     /**
@@ -26,16 +20,16 @@ public class SerialScheduler<T> extends AbstractSubScheduler<T> {
      * @param graph 要执行的图.
      */
     @Override
-    public void executeTask(Graph<T> graph) {
+    public void executeTask(Graph<?> graph) {
         executeSerial(graph);
     }
 
     /**
      * 串行执行图方式.
      */
-    public void executeSerial(Graph<T> graph) {
+    public void executeSerial(Graph<?> graph) {
         Vertex<?> vertex;
-        while ((vertex = executionQueue.poll()) != null) {
+        while ((vertex = graph.getExecutionQueue().poll()) != null) {
             graph.processVertex(vertex);
         }
     }

@@ -1,13 +1,15 @@
-package com.jth.mydag.processor;
+package com.jth.mydag.processor.processorImpl;
 
 import com.jth.mydag.graph.Vertex;
+import com.jth.mydag.processor.AbstractProcessor;
 
 import java.util.concurrent.CompletableFuture;
 
 /**
  * @author jiatihui
  */
-public class ProcessorC extends AbstractProcessor<Integer> {
+public class ProcessorJ extends AbstractProcessor<Integer> {
+
     @Override
     public CompletableFuture<Integer> process(Vertex<Integer> vertex) {
         try {

@@ -1,6 +1,7 @@
-package com.jth.mydag.processor;
+package com.jth.mydag.processor.processorImpl;
 
 import com.jth.mydag.graph.Vertex;
+import com.jth.mydag.processor.AbstractProcessor;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -15,10 +16,12 @@ public class ProcessorG extends AbstractProcessor<Map<String, Object>> {
         Object aResult = vertex.getDependencyData().get("A");
         Object bResult = vertex.getDependencyData().get("B");
         Object fResult = vertex.getDependencyData().get("F");
+        Object subGraphResult = vertex.getDependencyData().get("subName");
         Map<String, Object> map = new HashMap<>();
         map.put("A", aResult);
         map.put("B", bResult);
         map.put("F", fResult);
+        map.put("subName", subGraphResult);
         try {
             Thread.sleep(100);
         } catch (InterruptedException e) {

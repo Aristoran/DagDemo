@@ -1,12 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
-    <bean id="processorA" class="com.jth.mydag.processor.ProcessorA"/>
-    <bean id="processorB" class="com.jth.mydag.processor.ProcessorB"/>
-    <bean id="processorC" class="com.jth.mydag.processor.ProcessorC"/>
-    <bean id="processorD" class="com.jth.mydag.processor.ProcessorD"/>
-    <bean id="processorE" class="com.jth.mydag.processor.ProcessorE"/>
-    <bean id="processorF" class="com.jth.mydag.processor.ProcessorF"/>
-    <bean id="processorG" class="com.jth.mydag.processor.ProcessorG"/>
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd">
+    <bean id="processorA" class="com.jth.mydag.processor.processorImpl.ProcessorA"/>
+    <bean id="processorB" class="com.jth.mydag.processor.processorImpl.ProcessorB"/>
+    <bean id="processorC" class="com.jth.mydag.processor.processorImpl.ProcessorC"/>
+    <bean id="processorD" class="com.jth.mydag.processor.processorImpl.ProcessorD"/>
+    <bean id="processorE" class="com.jth.mydag.processor.processorImpl.ProcessorE"/>
+    <bean id="processorF" class="com.jth.mydag.processor.processorImpl.ProcessorF"/>
+    <bean id="processorG" class="com.jth.mydag.processor.processorImpl.ProcessorG"/>
+
+    <bean id="processorH" class="com.jth.mydag.processor.processorImpl.ProcessorH"/>
+    <bean id="processorI" class="com.jth.mydag.processor.processorImpl.ProcessorI"/>
+    <bean id="processorJ" class="com.jth.mydag.processor.processorImpl.ProcessorJ"/>
+    <bean id="processorK" class="com.jth.mydag.processor.processorImpl.ProcessorK"/>
+    <bean id="processorL" class="com.jth.mydag.processor.processorImpl.ProcessorL"/>
+    <bean id="processorM" class="com.jth.mydag.processor.processorImpl.ProcessorM"/>
+    <bean id="processorN" class="com.jth.mydag.processor.processorImpl.ProcessorN"/>
+    <!--并行任务调度器-->
+    <bean id="schedulerParallel" class="com.jth.mydag.graph.scheduler.ParallelScheduler">
+        <property name="strategy">
+            <util:constant static-field="com.jth.mydag.graph.scheduler.ParallelScheduler$RunStrategy.POOL"/>
+        </property>
+    </bean>
+
 </beans>

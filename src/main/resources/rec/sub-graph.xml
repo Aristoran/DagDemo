@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd">
+    <import resource="processor.xml"/>
+    <bean id = "vertexH" class="com.jth.mydag.graph.Vertex">
+        <constructor-arg name="name" value="H"/>
+        <constructor-arg name="id" value="0"/>
+        <property name="processor" ref="processorH"/>
+    </bean>
+
+    <bean id = "vertexI" class="com.jth.mydag.graph.Vertex">
+        <constructor-arg name="name" value="I"/>
+        <constructor-arg name="id" value="1"/>
+        <property name="processor" ref="processorI"/>
+        <property name="dependencyNames">
+            <list>
+                <value>H</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean id = "vertexJ" class="com.jth.mydag.graph.Vertex">
+        <constructor-arg name="name" value="J"/>
+        <constructor-arg name="id" value="2"/>
+        <property name="processor" ref="processorJ"/>
+        <property name="dependencyNames">
+            <list>
+                <value>H</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean id = "vertexK" class="com.jth.mydag.graph.Vertex">
+        <constructor-arg name="name" value="K"/>
+        <constructor-arg name="id" value="3"/>
+        <property name="processor" ref="processorK"/>
+        <property name="dependencyNames">
+            <list>
+                <value>J</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean id = "vertexL" class="com.jth.mydag.graph.Vertex">
+        <constructor-arg name="name" value="L"/>
+        <constructor-arg name="id" value="4"/>
+        <property name="processor" ref="processorL"/>
+        <property name="dependencyNames">
+            <list>
+                <value>H</value>
+                <value>J</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean id = "vertexM" class="com.jth.mydag.graph.Vertex">
+        <constructor-arg name="name" value="M"/>
+        <constructor-arg name="id" value="5"/>
+        <property name="processor" ref="processorM"/>
+        <property name="dependencyNames">
+            <list>
+                <value>L</value>
+                <value>K</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean id = "vertexN" class="com.jth.mydag.graph.Vertex">
+        <constructor-arg name="name" value="target"/>
+        <constructor-arg name="id" value="6"/>
+        <property name="processor" ref="processorN"/>
+        <property name="dependencyNames">
+            <list>
+                <value>H</value>
+                <value>I</value>
+                <value>M</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean id = "subGraph" class="com.jth.mydag.graph.Graph">
+        <property name="context" ref="subGraphContext"/>
+        <property name="scheduler" ref = "schedulerParallel"/>
+        <property name="vertices">
+            <list>
+                <ref bean="vertexH"/>
+                <ref bean="vertexI"/>
+                <ref bean="vertexJ"/>
+                <ref bean="vertexK"/>
+                <ref bean="vertexL"/>
+                <ref bean="vertexM"/>
+                <ref bean="vertexN"/>
+            </list>
+        </property>
+    </bean>
+
+    <bean id = "subGraphContext" class="com.jth.mydag.graph.GraphContext">
+    </bean>
+</beans>

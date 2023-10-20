@@ -2,8 +2,6 @@ package com.jth.mydag.graph.scheduler;
 
 import com.jth.mydag.graph.Graph;
 import com.jth.mydag.graph.Vertex;
-import com.jth.mydag.graph.config.AppConfig;
-import com.jth.mydag.graph.utils.FutureUtils;
 import com.jth.mydag.graph.utils.GraphConstants;
 import lombok.Getter;
 import lombok.Setter;
@@ -12,12 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PreDestroy;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author jiatihui
@@ -26,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 @Log4j2
 @Component
 @Getter @Setter
-public class ParallelScheduler<T> extends AbstractSubScheduler<T> {
+public class ParallelScheduler extends AbstractSubScheduler {
 
     /**
      * 自定义线程池.
@@ -39,29 +33,25 @@ public class ParallelScheduler<T> extends AbstractSubScheduler<T> {
     public ParallelScheduler() {
         super();
     }
-    public ParallelScheduler(ExecutorService executorService,
-                     Queue<Vertex<?>> activationQueue,
-                     Queue<Vertex<?>> executionQueue) {
-        super(activationQueue, executionQueue);
+
+    public ParallelScheduler(ExecutorService executorService) {
         this.executorService =  executorService;
     }
 
-    public ParallelScheduler(ExecutorService executorService,
-                             Queue<Vertex<?>> activationQueue,
-                             Queue<Vertex<?>> executionQueue, RunStrategy strategy) {
-        this(executorService, activationQueue, executionQueue);
+    public ParallelScheduler(ExecutorService executorService, RunStrategy strategy) {
+        this(executorService);
         this.strategy = strategy;
     }
 
     @Override
-    public void executeTask(Graph<T> graph) {
+    public void executeTask(Graph<?> graph) {
         executeByStrategy(graph);
     }
 
     /**
      * 根据策略执行图调度，线程池 or CompletableFuture.
      */
-    public void executeByStrategy(Graph<T> graph) {
+    public void executeByStrategy(Graph<?> graph) {
         switch (strategy) {
             case FUTURE:
                 executeByFuture(graph);
@@ -76,13 +66,13 @@ public class ParallelScheduler<T> extends AbstractSubScheduler<T> {
     /**
      * 使用线程池实现调度逻辑.
      */
-    public void executeByPool(Graph<T> graph) {
+    public void executeByPool(Graph<?> graph) {
         Vertex<?> vertex;
         //图执行的最终节点
         Vertex<?> targetVertex = graph.getContext().getVertexMap()
                 .get(GraphConstants.TARGET);
         while (!targetVertex.getIsExecuted().get()) {
-            if ((vertex = executionQueue.poll()) != null) {
+            if ((vertex = graph.getExecutionQueue().poll()) != null) {
                 executorService.submit(new Task<>(vertex, graph));
             }
         }
@@ -91,11 +81,11 @@ public class ParallelScheduler<T> extends AbstractSubScheduler<T> {
     /**
      * 使用线程池实现调度逻辑.
      */
-    public void execute(Graph<T> graph) {
+    public void execute(Graph<?> graph) {
         Vertex<?> vertex;
         while (graph.getExecutedCount().get()
                 != graph.getActivatedCount().get()) {
-            if ((vertex = executionQueue.poll()) != null) {
+            if ((vertex = graph.getExecutionQueue().poll()) != null) {
                 executorService.submit(new Task<>(vertex, graph));
             }
         }
@@ -104,33 +94,30 @@ public class ParallelScheduler<T> extends AbstractSubScheduler<T> {
     /**
      * 执行图调度入口.
      */
-    public void executeGraph(Graph<T> graph) {
+    public void executeGraph(Graph<?> graph) {
         execute(graph);
     }
 
     /**
      * 执行调度入口，使用CompletableFuture实现.
      */
-    public void executeByFuture(Graph<T> graph) {
-        List<CompletableFuture<Void>> futures
-                = new ArrayList<>(executionQueue.size());
+    public void executeByFuture(Graph<?> graph) {
         Vertex<?> vertex;
         //图执行的最终节点
         Vertex<?> targetVertex = graph.getContext().getVertexMap()
                 .get(GraphConstants.TARGET);
         while (!targetVertex.getIsExecuted().get()) {
-            if ((vertex = executionQueue.poll()) != null) {
-                futures.add(processVertexAsync(new Task<>(vertex, graph)));
+            if ((vertex = graph.getExecutionQueue().poll()) != null) {
+                processVertexAsync(new Task<>(vertex, graph));
             }
         }
     }
 
     /**
      * 异步处理任务的方法。异步处理当前顶点并设置结果和执行状态.
-     ** @return CompletableFuture<Void> 返回一个CompletableFuture，表示异步计算的结果.
      */
-    private CompletableFuture<Void> processVertexAsync(Task<?> task) {
-        return CompletableFuture.runAsync(task);
+    private void processVertexAsync(Task<?> task) {
+        CompletableFuture.runAsync(task);
     }
 
     /**
@@ -140,10 +127,10 @@ public class ParallelScheduler<T> extends AbstractSubScheduler<T> {
     private void cleanup() {
         executorService.shutdown();
     }
-    public class Task<E> implements Runnable {
+    public static class Task<E> implements Runnable {
         private final Vertex<E> vertex;
-        private final Graph<T> graph;
-        public Task(Vertex<E> vertex, Graph<T> graph) {
+        private final Graph<?> graph;
+        public Task(Vertex<E> vertex, Graph<?> graph) {
             this.vertex = vertex;
             this.graph = graph;
         }
@@ -153,7 +140,7 @@ public class ParallelScheduler<T> extends AbstractSubScheduler<T> {
             try {
                 graph.processVertex(vertex);
             } catch (RuntimeException re) {
-                log.error("Error processing vertex: " + vertex.getId(), re);
+                log.error("graph process error: " + re.getMessage());
             }
         }
     }

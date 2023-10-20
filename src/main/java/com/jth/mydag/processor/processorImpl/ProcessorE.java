@@ -1,6 +1,7 @@
-package com.jth.mydag.processor;
+package com.jth.mydag.processor.processorImpl;
 
 import com.jth.mydag.graph.Vertex;
+import com.jth.mydag.processor.AbstractProcessor;
 
 import java.util.concurrent.CompletableFuture;
 

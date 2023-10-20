@@ -8,10 +8,13 @@ import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -23,6 +26,24 @@ import java.util.concurrent.atomic.AtomicReference;
 @Log4j2
 @Component
 public class Graph<T> {
+
+    /**
+     * 图激活队列.
+     */
+    @Setter @Getter
+    private Queue<Vertex<?>> activationQueue = new ConcurrentLinkedQueue<>();
+
+    /**
+     * 图执行队列.
+     */
+    @Setter @Getter
+    private Queue<Vertex<?>> executionQueue = new ConcurrentLinkedQueue<>();
+
+    /**
+     * 图节点.
+     */
+    @Getter @Setter
+    private List<Vertex<?>> vertices = new ArrayList<>(200);
 
     /**
      * 已执行的图节点数量.
@@ -46,19 +67,20 @@ public class Graph<T> {
      * 任务执行器
      */
     @Setter
-    private AbstractSubScheduler<T> scheduler;
+    private AbstractSubScheduler scheduler;
 
     public Graph() {
         this.context = new GraphContext<>();
-        this.scheduler = new ParallelScheduler<>();
+        this.scheduler = new ParallelScheduler();
     }
 
     public Graph(List<Vertex<?>> vertices) {
+        this.vertices = vertices;
         this.context = new GraphContext<>(vertices);
-        this.scheduler = new ParallelScheduler<>();
+        this.scheduler = new ParallelScheduler();
     }
 
-    public Graph(List<Vertex<?>> vertices, AbstractSubScheduler<T> scheduler) {
+    public Graph(List<Vertex<?>> vertices, AbstractSubScheduler scheduler) {
         this(vertices);
         this.scheduler = scheduler;
     }
@@ -68,12 +90,18 @@ public class Graph<T> {
     }
 
     private void initVertices() {
-        List<Vertex<?>> vertices = context.getVertices();
         vertices.forEach(vertex
                 -> context.getVertexMap().put(vertex.getName(), vertex));
         vertices.parallelStream().forEach(vertex
                 -> vertex.getDependencyNames().forEach(name
-                -> vertex.addDependency(context.getVertexMap().get(name))));
+                -> {
+                    Vertex<?> dependency = context.getVertexMap().get(name);
+                    if (dependency == null) {
+                        log.error(String.format("%s dependency %s is null", vertex.getName(), name));
+                        return;
+                    }
+                    vertex.addDependency(dependency);
+                }));
         activateVertex(); //图激活
     }
 
@@ -108,15 +136,15 @@ public class Graph<T> {
         }
         vertex.setIsActivated(new AtomicBoolean(true));
         activatedCount.incrementAndGet();
-        scheduler.getActivationQueue().add(vertex);
+        activationQueue.add(vertex);
         Vertex<?> currentVertex;
-        while ((currentVertex = scheduler.getActivationQueue().poll()) != null) {
+        while ((currentVertex = activationQueue.poll()) != null) {
             for (Vertex<?> dependency : currentVertex.getDependencies()) {
                 currentVertex.getDependencyCount().incrementAndGet();
                 activate(dependency);
             }
             if (currentVertex.getDependencyCount().get() == 0) {
-                scheduler.getExecutionQueue().add(currentVertex);
+                executionQueue.add(currentVertex);
             }
         }
     }
@@ -154,6 +182,10 @@ public class Graph<T> {
         visited.add(vertex);
         recursionStack.add(vertex);
         for (Vertex<?> dependency : vertex.getDependencies()) {
+            if (dependency == null) {
+                log.error("dependency is null, check cycle interrupt!");
+                return true;
+            }
             if (checkCycle(dependency, visited, recursionStack)) {
                 return true;
             }
@@ -175,10 +207,10 @@ public class Graph<T> {
         // 设置当前顶点为已执行状态
         vertex.setIsExecuted(new AtomicBoolean(true));
         log.error(String.format("vertex %s executed", vertex.getName()));
-        //执行数量+1
+        // 执行数量+1
         executedCount.incrementAndGet();
         // 遍历所有的节点
-        for (Vertex<?> dependentVertex : context.getVertices()) {
+        for (Vertex<?> dependentVertex : vertices) {
             // 如果节点已经执行过，那么就跳过
             if (vertex == dependentVertex || dependentVertex.getIsExecuted().get()) {
                 continue;
@@ -196,7 +228,7 @@ public class Graph<T> {
                 // 其中一个状态还是false, 仍旧会被添加到队列中来，
                 // 所以包在判断语句内部，只有依赖当前节点的节点可以执行
                 if (dependentVertex.getDependencyCount().get() == 0) {
-                    scheduler.getExecutionQueue().add(dependentVertex);
+                    executionQueue.add(dependentVertex);
                 }
             }
         }
@@ -230,8 +262,10 @@ public class Graph<T> {
      * 图重置.
      */
     public void reset() {
+        vertices.forEach(Vertex::reset);
         context.reset();
-        scheduler.reset();
+        activationQueue.clear();
+        executionQueue.clear();
     }
 
 }

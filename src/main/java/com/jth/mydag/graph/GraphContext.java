@@ -6,7 +6,9 @@ import lombok.Setter;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -17,28 +19,22 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Component
 @Getter @Setter
 public class GraphContext<T> {
-    /**
-     * 图节点.
-     */
-    private List<Vertex<?>> vertices;
 
     /**
      * 图节点映射.
      */
-    private ConcurrentHashMap<String, Vertex<?>> vertexMap;
+    private Map<String, Vertex<?>> vertexMap;
     /**
      * 图对象结果.
      */
     private T result;
 
     public GraphContext() {
-        this.vertices = new ArrayList<>(200);
-        this.vertexMap = new ConcurrentHashMap<>(256);
+        this.vertexMap = new HashMap<>(256);
     }
 
     public GraphContext(List<Vertex<?>> vertices) {
         this();
-        this.vertices = vertices;
     }
 
     public void collectResult() {
@@ -50,7 +46,6 @@ public class GraphContext<T> {
      * 重置成员变量
      */
     protected void reset() {
-        this.vertices.forEach(Vertex::reset);
         this.result = null;
     }
 }
